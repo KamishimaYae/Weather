@@ -8,136 +8,68 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
 import android.view.View;
-import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import org.json.JSONException;
 import org.json.JSONObject;
-import java.text.DateFormat;
-import java.util.Date;
-import java.util.Locale;
-
-public class MainActivity extends AppCompatActivity {
 
 
+        public class MainActivity extends AppCompatActivity {
+
+            // Project Created by Ferdousur Rahman Shajib
+            // www.androstock.com
+
+            TextView temperature, humidity_field, pressure_field;
+            /* Please Put your API KEY here */
+            //String OPEN_WEATHER_MAP_API = "6fed7f8a8b65d9b677317a8833be2d0c";
+            /* Please Put your API KEY here */
+            //http://api.openweathermap.org/data/2.5/weather?lat=34.8899&lon=135.2254
 
 
-        // Project Created by Ferdousur Rahman Shajib
-        // www.androstock.com
+            @Override
+            protected void onCreate(Bundle savedInstanceState) {
+                super.onCreate(savedInstanceState);
+                setContentView(R.layout.activity_main);
 
-        TextView selectCity, cityField, detailsField, currentTemperatureField, humidity_field, pressure_field, weatherIcon, updatedField;
-        ProgressBar loader;
-        Typeface weatherFont;
-        String city = "Tokyo, JP";
-        /* Please Put your API KEY here */
-        String OPEN_WEATHER_MAP_API = "6fed7f8a8b65d9b677317a8833be2d0c";
-        /* Please Put your API KEY here */
+                temperature = (TextView) findViewById(R.id.temperature);
+                humidity_field = (TextView) findViewById(R.id.humidity_field);
+                pressure_field = (TextView) findViewById(R.id.pressure_field);
 
 
-        @Override
-        protected void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            getSupportActionBar().hide();
-            setContentView(R.layout.activity_main);
+            }
 
-            loader = (ProgressBar) findViewById(R.id.loader);
-            selectCity = (TextView) findViewById(R.id.selectCity);
-            cityField = (TextView) findViewById(R.id.city_field);
-            updatedField = (TextView) findViewById(R.id.updated_field);
-            detailsField = (TextView) findViewById(R.id.details_field);
-            currentTemperatureField = (TextView) findViewById(R.id.current_temperature_field);
-            humidity_field = (TextView) findViewById(R.id.humidity_field);
-            pressure_field = (TextView) findViewById(R.id.pressure_field);
-            weatherIcon = (TextView) findViewById(R.id.weather_icon);
-            weatherFont = Typeface.createFromAsset(getAssets(), "fonts/weathericons-regular-webfont.ttf");
-            weatherIcon.setTypeface(weatherFont);
 
-            taskLoadUp(city);
 
-            selectCity.setOnClickListener(new View.OnClickListener() {
+            class DownloadWeather extends AsyncTask < String, Void, String > {
                 @Override
-                public void onClick(View v) {
-                    AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivity.this);
-                    alertDialog.setTitle("Change City");
-                    final EditText input = new EditText(MainActivity.this);
-                    input.setText(city);
-                    LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                            LinearLayout.LayoutParams.MATCH_PARENT,
-                            LinearLayout.LayoutParams.MATCH_PARENT);
-                    input.setLayoutParams(lp);
-                    alertDialog.setView(input);
+                protected void onPreExecute() {
+                    super.onPreExecute();
 
-                    alertDialog.setPositiveButton("Change",
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int which) {
-                                    city = input.getText().toString();
-                                    taskLoadUp(city);
-                                }
-                            });
-                    alertDialog.setNegativeButton("Cancel",
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int which) {
-                                    dialog.cancel();
-                                }
-                            });
-                    alertDialog.show();
                 }
-            });
+                protected String doInBackground(String...args) {
+                    String xml = Function.excuteGet("http://api.openweathermap.org/data/2.5/weather?34.8899&lon=135.2254&units=metric&appid=6fed7f8a8b65d9b677317a8833be2d0c");
+                    return xml;
+                }
+                @Override
+                protected void onPostExecute(String xml) {
 
-        }
+                    try {
+                        JSONObject json = new JSONObject(xml);
+                        if (json != null) {
+                            //JSONObject details = json.getJSONArray("weather").getJSONObject(0);
+                            JSONObject main = json.getJSONObject("main");
 
-
-        public void taskLoadUp(String query) {
-            if (Function.isNetworkAvailable(getApplicationContext())) {
-                DownloadWeather task = new DownloadWeather();
-                task.execute(query);
-            } else {
-                Toast.makeText(getApplicationContext(), "No Internet Connection", Toast.LENGTH_LONG).show();
-            }
-        }
-
-
-
-        class DownloadWeather extends AsyncTask < String, Void, String > {
-            @Override
-            protected void onPreExecute() {
-                super.onPreExecute();
-                loader.setVisibility(View.VISIBLE);
-
-            }
-            protected String doInBackground(String...args) {
-                String xml = Function.excuteGet("http://api.openweathermap.org/data/2.5/weather?q=" + args[0] +
-                        "&units=metric&appid=" + OPEN_WEATHER_MAP_API);
-                return xml;
-            }
-            @Override
-            protected void onPostExecute(String xml) {
-
-                try {
-                    JSONObject json = new JSONObject(xml);
-                    if (json != null) {
-                        JSONObject details = json.getJSONArray("weather").getJSONObject(0);
-                        JSONObject main = json.getJSONObject("main");
-                        DateFormat df = DateFormat.getDateTimeInstance();
-
-                        cityField.setText(json.getString("name").toUpperCase(Locale.JAPAN) + ", " + json.getJSONObject("sys").getString("country"));
-                        detailsField.setText(details.getString("description").toUpperCase(Locale.JAPAN));
-                        currentTemperatureField.setText(String.format("%.2f", main.getDouble("temp")) + "°");
-                        humidity_field.setText("Humidity: " + main.getString("humidity") + "%");
-                        pressure_field.setText("Pressure: " + main.getString("pressure") + " hPa");
-                        updatedField.setText(df.format(new Date(json.getLong("dt") * 1000)));
-                        weatherIcon.setText(Html.fromHtml(Function.setWeatherIcon(details.getInt("id"),
-                                json.getJSONObject("sys").getLong("sunrise") * 1000,
-                                json.getJSONObject("sys").getLong("sunset") * 1000)));
-
-                        loader.setVisibility(View.GONE);
-
+                            temperature.setText(String.format("%.2f", "三田の天気は"+main.getDouble("temp")) + "°");
+                            humidity_field.setText("Humidity: " + main.getString("humidity") + "%");
+                            pressure_field.setText("Pressure: " + main.getString("pressure") + " hPa");
+                        }
+                    } catch (JSONException e) {
+                        Toast.makeText(getApplicationContext(), "Error, Check City", Toast.LENGTH_SHORT).show();
                     }
-                } catch (JSONException e) {
-                    Toast.makeText(getApplicationContext(), "Error, Check City", Toast.LENGTH_SHORT).show();
+
+
                 }
+
 
 
             }
@@ -145,7 +77,3 @@ public class MainActivity extends AppCompatActivity {
 
 
         }
-
-
-
-    }
