@@ -13,6 +13,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Locale;
 
 /**
  * 非同期処理を行うクラス.
@@ -70,9 +71,11 @@ public final class AsyncHttpRequest extends AsyncTask<URL, Void, String> {
 
             // 受け取ったJSON文字列をパース
             JSONObject jsonObject = new JSONObject(response.toString());
-            JSONObject todayForcasts = jsonObject.getJSONObject("main");
+            JSONObject details = jsonObject.getJSONArray("weather").getJSONObject(TODAY_FORCAST_INDEX);
+            JSONObject todayForcasts = jsonObject.getJSONObject("main");//getJCONArrayにしていたため動かなかった。型があったため動いた
 
-            return "三田の気温は " + todayForcasts.getDouble("temp") +"°";
+            return "現在地の気温は " + todayForcasts.getDouble("temp") +"°\n天気は" +  details.getString("main") +"です";
+
         } catch (IOException e) {
             e.printStackTrace();
             return null;
