@@ -36,6 +36,7 @@ public final class AsyncHttpRequest extends AsyncTask<URL, Void, String> {
     protected String doInBackground(URL... urls) {
 
         final URL url = urls[0];
+        System.out.println("***********\n"+url);
         HttpURLConnection con = null;
 
         try {
@@ -74,7 +75,13 @@ public final class AsyncHttpRequest extends AsyncTask<URL, Void, String> {
             JSONObject details = jsonObject.getJSONArray("weather").getJSONObject(TODAY_FORCAST_INDEX);
             JSONObject todayForcasts = jsonObject.getJSONObject("main");//getJCONArrayにしていたため動かなかった。型があったため動いた
 
-            return "現在地の気温は " + todayForcasts.getDouble("temp") +"°\n天気は" +  details.getString("main") +"です";
+            /*TextView current_location = (TextView) mainActivity.findViewById(R.id.location);
+            TextView temperature = (TextView) mainActivity.findViewById(R.id.temperature);
+            TextView weather = (TextView) mainActivity.findViewById(R.id.weather);
+            current_location.setText("現在地:"+jsonObject.getString("name"));
+            weather.setText("気温:"+todayForcasts.getDouble("temp")+"°");*/
+
+            return "現在地の気温は"+ todayForcasts.getDouble("temp")+"°\n天気は" +  details.getString("main")+"です";
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -95,6 +102,7 @@ public final class AsyncHttpRequest extends AsyncTask<URL, Void, String> {
      */
     @Override
     protected void onPostExecute(String result) {
+
         TextView tv = mainActivity.findViewById(R.id.weather);
         tv.setText(result);
     }

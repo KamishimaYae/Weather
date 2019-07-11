@@ -121,14 +121,15 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
-        TextView textView1 = (TextView) findViewById(R.id.textView);
+        //緯度の表示
+        TextView latitude = (TextView) findViewById(R.id.latitude);
         String str1 = "Latitude:"+location.getLatitude();
-        textView1.setText(str1);
+        latitude.setText(str1);
 
         // 経度の表示
-        TextView textView2 = (TextView) findViewById(R.id.textView2);
+        TextView longitude = (TextView) findViewById(R.id.longitude);
         String str2 = "Longtude:"+location.getLongitude();
-        textView2.setText(str2);
+        longitude.setText(str2);
     }
 
     @Override
