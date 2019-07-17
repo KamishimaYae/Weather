@@ -55,7 +55,7 @@ public final class AsyncHttpRequest extends AsyncTask<URL, Void, String> {
             // レスポンス(JSON文字列)を読み込む準備
             final InputStream in = con.getInputStream();
             String encoding = con.getContentEncoding();
-            if(null == encoding){
+            if (null == encoding) {
                 encoding = "UTF-8";
             }
             final InputStreamReader inReader = new InputStreamReader(in, encoding);
@@ -63,25 +63,36 @@ public final class AsyncHttpRequest extends AsyncTask<URL, Void, String> {
             StringBuilder response = new StringBuilder();
             String line = null;
             // 1行ずつ読み込む
-            while((line = bufReader.readLine()) != null) {
+            while ((line = bufReader.readLine()) != null) {
                 response.append(line);
             }
             bufReader.close();
             inReader.close();
             in.close();
 
+
             // 受け取ったJSON文字列をパース
             JSONObject jsonObject = new JSONObject(response.toString());
             JSONObject details = jsonObject.getJSONArray("weather").getJSONObject(TODAY_FORCAST_INDEX);
             JSONObject todayForcasts = jsonObject.getJSONObject("main");//getJCONArrayにしていたため動かなかった。型があったため動いた
-
+            String tenkou = details.getString("main");
+            if (tenkou.equals("Rain")) {
+                tenkou = "雨";
+            } else if (tenkou.equals("Clear")) {
+                tenkou = "晴れ";
+            } else if (tenkou.equals("Clouds")) {
+                tenkou = "曇り";
+            } else if (tenkou.equals("Snow")){
+                tenkou = "雪";
+            }
             /*TextView current_location = (TextView) mainActivity.findViewById(R.id.location);
             TextView temperature = (TextView) mainActivity.findViewById(R.id.temperature);
             TextView weather = (TextView) mainActivity.findViewById(R.id.weather);
             current_location.setText("現在地:"+jsonObject.getString("name"));
             weather.setText("気温:"+todayForcasts.getDouble("temp")+"°");*/
 
-            return "現在地の気温は"+ todayForcasts.getDouble("temp")+"°\n天気は" +  details.getString("main")+"です";
+            //return "現在地の気温は"+ todayForcasts.getDouble("temp")+"°\n天気は" +  details.getString("main")+"です";
+            return jsonObject.getString("name")+"の気温は " + todayForcasts.getDouble("temp") +"°\n天気は" +  tenkou +"です";
 
         } catch (IOException e) {
             e.printStackTrace();
